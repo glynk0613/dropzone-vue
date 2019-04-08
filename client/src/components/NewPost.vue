@@ -27,7 +27,7 @@ export default {
   },
   methods: {
     async addPost () {
-      await PostsService.addPost({
+      await PostsService.addPostItem({
         title: this.title,
         description: this.description
       })

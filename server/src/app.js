@@ -3,12 +3,32 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
 
-var Post = require("../models/posts");
+
+var Post = require('../models/posts');
 
 const app = express()
 app.use(morgan('combined'))
 app.use(bodyParser.json())
 app.use(cors())
+
+
+const path = require('path')
+const fs = require('fs')
+const multer = require('multer')
+const mkdirp = require('mkdirp')
+
+const uploadPath = 'uploaded'
+const upload = multer({ dest: uploadPath })
+const uuidv4 = require('uuid/v4')
+mkdirp.sync(uploadPath)
+const handleError = (err, res) => {
+  res
+    .status(500)
+    .contentType('text/plain')
+    .end('Oops! Something went wrong!')
+}
+var publicDir = require('path').join(__dirname,'../uploaded/');
+app.use(express.static(publicDir));
 
 // DB Setup
 var mongoose = require('mongoose');
@@ -34,13 +54,56 @@ db.on('error', function (error) {
   }
 });
 
-db.once("open", function(callback){
-  console.log("Connection Succeeded");
+db.once('open', function(callback){
+  console.log('Connection Succeeded');
 });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    const tempPath = req.file.path
+    const extName = path.extname(req.file.originalname).toLowerCase();
+    const targetPath = path.join(__dirname, '../uploaded/' + uuidv4() + extName)
+    if ( extName === '.png' || extName === '.jpg' || extName === '.jpeg' || extName === '.gif') {
+      fs.rename(tempPath, targetPath, err => {
+        if (err) return handleError(err, res)
+        
+        var title = req.file.originalname
+        var description = req.body.description
+        var db = req.db
+
+        var newPost = new Post({
+          url: targetPath,
+          description: description,
+          likes: 0,
+          data: new Date()
+        })
+ 
+ 
+        newPost.save(function(error) {
+          if (error) return handleError(error, res);
+          res
+            .status(200)
+            .contentType('text/plain')
+            .end('File uploaded!')
+        })
+      
+
+      });
+    } else {
+      fs.unlink(tempPath, err => {
+        if (err) return handleError(err, res);
+
+        res
+          .status(403)
+          .contentType('text/plain')
+          .end('Only .png|.jpg|.gif files are allowed!');
+      });
+    }
+  }
+);
 
 // SERVER Setup
 app.get('/posts', (req, res) => {
-  Post.find({}, 'title description', function (error, posts) {
+  Post.find({}, 'url description likes date', function (error, posts) {
     if (error) { console.error(error); }
     res.send({
       posts: posts

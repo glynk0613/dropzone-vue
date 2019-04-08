@@ -6,6 +6,21 @@ export default {
   },
 
   addPost (params) {
+    console.log(params)
+    let formData = new FormData()
+    formData.append('file', params.file)
+    formData.append('description', params.description)
+
+    return Api().post('/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    )
+  },
+  addPostItem (params) {
     return Api().post('posts', params)
   },
 
