@@ -12,6 +12,9 @@
           <button class="app_post_btn" @click="addPost">Add</button>
         </div>
       </div>
+   
+
+      </div>
   </div>
 </template>
 

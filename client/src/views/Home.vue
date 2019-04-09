@@ -1,14 +1,17 @@
 <template>
   <div class='container'>
     <Uploader v-on:upload="uploadFile"></Uploader>
+    <Posts></Posts>
   </div>
 </template>
 <script>
 import Uploader from '../components/Uploader'
+import Posts from '../components/Posts'
 
 export default {
   components: {
-    Uploader
+    Uploader,
+    Posts
   },
   methods: {
     uploadFile (data) {

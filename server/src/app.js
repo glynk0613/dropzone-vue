@@ -27,8 +27,9 @@ const handleError = (err, res) => {
     .contentType('text/plain')
     .end('Oops! Something went wrong!')
 }
-var publicDir = require('path').join(__dirname,'../uploaded/');
+var publicDir = require('path').join(__dirname,'../' + uploadPath);
 app.use(express.static(publicDir));
+const perPage = 8
 
 // DB Setup
 var mongoose = require('mongoose');
@@ -61,21 +62,22 @@ db.once('open', function(callback){
 app.post('/upload', upload.single('file'), (req, res) => {
     const tempPath = req.file.path
     const extName = path.extname(req.file.originalname).toLowerCase();
-    const targetPath = path.join(__dirname, '../uploaded/' + uuidv4() + extName)
+    const fileName = uuidv4() + extName;
+    const targetPath = path.join(__dirname, '../' + uploadPath + '/' + fileName)
     if ( extName === '.png' || extName === '.jpg' || extName === '.jpeg' || extName === '.gif') {
       fs.rename(tempPath, targetPath, err => {
         if (err) return handleError(err, res)
         
-        var title = req.file.originalname
         var description = req.body.description
         var db = req.db
 
         var newPost = new Post({
-          url: targetPath,
+          url: fileName,
           description: description,
           likes: 0,
-          data: new Date()
+          date: new Date()
         })
+        console.log(newPost, '-------------------')
  
  
         newPost.save(function(error) {
@@ -102,13 +104,17 @@ app.post('/upload', upload.single('file'), (req, res) => {
 );
 
 // SERVER Setup
-app.get('/posts', (req, res) => {
+app.get('/posts/:pageNumber', (req, res) => {
+  var currentPage = req.params.pageNumber ? req.params.pageNumber : 1
+  var total = Post.find({}).count()
   Post.find({}, 'url description likes date', function (error, posts) {
     if (error) { console.error(error); }
     res.send({
+      perPage: perPage,
+      total: total,
       posts: posts
     })
-  }).sort({_id:-1})
+  }).sort({_id:-1}).skip(perPage * (currentPage - 1)).limit(perPage)
 });
 
 

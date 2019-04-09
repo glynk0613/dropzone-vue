@@ -17,7 +17,8 @@
           <div id="content-wrapper" class="col-sm-6">
             <textarea v-model="description">
             </textarea>
-            <button class="btn btn-primary" v-on:click="addPost">Post</button>
+            <p v-if="result">{{result}}</p>
+            <button v-else class="btn btn-primary" v-on:click="addPost">Post</button>
           </div>
         </div>
       </div>
@@ -36,13 +37,15 @@ export default {
     return {
       showPreview: false,
       file: null,
-      description: null
+      description: null,
+      result: false,
+      loading: false
     }
   },
   mounted () {
     const vm = this
     let options = {
-      url: '/ffffffffffffffffff',
+      url: '/',
       method: 'put',
       parallelUploads: 5,
       acceptedFiles: '.png, .gif, .jpeg, .jpg',
@@ -61,20 +64,19 @@ export default {
     this.dropzone = new Dropzone(this.$refs.dropzoneElement, options)
   },
   methods: {
-    // onPost () {
-    //   // let formData = new FormData();
-    //   // formData.append('file', this.file);
-
-
-    //   // this.$emit('upload', {file: this.file, content: this.content})
-
-
-    // }
     async addPost () {
-      await PostsService.addPost({
+      this.loading = true
+      if (this.posted) return
+      const res = await PostsService.addPost({
         file: this.file,
         description: this.description
       })
+      this.loading = false
+      if (res.status === 200) {
+        this.result = res.data
+      } else {
+        this.posted = 'Something wrong!'
+      }
     }
   }
 }
