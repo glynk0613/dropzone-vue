@@ -1,23 +1,22 @@
 <template>
   <div class="uploader">
-    <div class="dropzone" ref="dropzoneElement">
-    </div>
+    <div class="dropzone" ref="dropzoneElement"></div>
     <Modal :show="showPreview" @close="showPreview = false">
       <div slot="header">
-        <h4 class="modal-title">
-          New Posts
-        </h4>
- 				<button type="button" class="close" data-dismiss="modal" v-on:click="showPreview = false">✕</button>
+        <h4 class="modal-title">New Posts</h4>
+        <button type="button" class="close" data-dismiss="modal" v-on:click="showPreview = false">✕</button>
       </div>
       <div slot="body" v-if="file">
         <div class="row">
           <div id="img-wrapper" class="col-sm-6">
-            <img :src="file.dataURL" />
-            <p class="img-info"><strong> {{ file.name }} </strong> ( {{ file.width }} x {{ file.height }} )</p>
+            <img :src="file.dataURL">
+            <p class="img-info">
+              <strong>{{ file.name }}</strong>
+              ( {{ file.width }} x {{ file.height }} )
+            </p>
           </div>
           <div id="content-wrapper" class="col-sm-6">
-            <textarea v-model="description">
-            </textarea>
+            <textarea v-model="description"></textarea>
             <p v-if="result">{{result}}</p>
             <button v-else class="btn btn-primary" v-on:click="addPost">Post</button>
           </div>
@@ -39,7 +38,7 @@ export default {
       showPreview: false,
       file: null,
       description: null,
-      result: false,
+      result: null,
       loading: false
     }
   },
@@ -60,6 +59,8 @@ export default {
       thumbnail (file) {
         vm.showPreview = true
         vm.file = file
+        vm.result = null
+        vm.description = null
       }
     }
     this.dropzone = new Dropzone(this.$refs.dropzoneElement, options)
@@ -84,36 +85,34 @@ export default {
   }
 }
 </script>
+
 <style lang="scss">
-  .uploader {
-    .dropzone {
-      border: 2px solid #e6e6e6;
-      border-radius: 10px;
+.uploader {
+  .dropzone {
+    border: 2px solid #e6e6e6;
+    border-radius: 10px;
+  }
+  #img-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    img {
+      width: 100%;
+      object-fit: contain;
     }
-    #img-wrapper {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      img {
-        width: 100%;
-        // max-height: 300px;
-        object-fit: contain;
-      }
-      p {
-        margin-top: 5px;
-        font-size: 12px;
-      }
-    }
-    #content-wrapper {
-      textarea {
-        width: 100%;
-        height: 120px;
-      }
-
+    p {
+      margin-top: 5px;
+      font-size: 12px;
     }
   }
-  .dz-preview {
-    display: none;
+  #content-wrapper {
+    textarea {
+      width: 100%;
+      height: 120px;
+    }
   }
-
+}
+.dz-preview {
+  display: none;
+}
 </style>
