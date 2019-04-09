@@ -1,7 +1,7 @@
 <template>
   <div class='container'>
-    <Uploader v-on:upload="uploadFile"></Uploader>
-    <Posts></Posts>
+    <Uploader v-on:onPosted="onPosted"></Uploader>
+    <Posts ></Posts>
   </div>
 </template>
 <script>
@@ -14,8 +14,8 @@ export default {
     Posts
   },
   methods: {
-    uploadFile (data) {
-      console.log(data)
+    onPosted (res) {
+      console.log('---------', res)
     }
   }
 }

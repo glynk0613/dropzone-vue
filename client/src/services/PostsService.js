@@ -20,6 +20,9 @@ export default {
       }
     )
   },
+  likePost (params) {
+    return Api().put('like/' + params.id, params)
+  },
   addPostItem (params) {
     return Api().post('posts', params)
   },

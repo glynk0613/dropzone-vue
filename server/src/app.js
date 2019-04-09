@@ -69,16 +69,14 @@ app.post('/upload', upload.single('file'), (req, res) => {
         if (err) return handleError(err, res)
         
         var description = req.body.description
-        var db = req.db
 
         var newPost = new Post({
           url: fileName,
           description: description,
-          likes: 0,
+          likes: [],
           date: new Date()
         })
-        console.log(newPost, '-------------------')
- 
+
  
         newPost.save(function(error) {
           if (error) return handleError(error, res);
@@ -116,42 +114,50 @@ app.get('/posts/:pageNumber', async (req, res) => {
 
   var totalPages = Math.ceil(totalRecords / perPage)
   
-  Post.find({}, 'url description likes date', function (error, posts) {
+  Post.find({}, 'url description date likes', function (error, posts) {
     if (error) { console.error(error); }
     res.send({
       perPage: perPage,
-      totalPages: totalRecords,
+      totalPages: totalPages,
       posts: posts
     })
   }).sort({_id:-1}).skip(perPage * (currentPage - 1)).limit(perPage)
 });
 
-
-// Post Endpoints
-app.post('/posts', (req, res) => {
+// Update a post
+app.put('/like/:id', (req, res) => {
   var db = req.db;
-  var title = req.body.title;
-  var description = req.body.description;
-  var new_post = new Post({
-    title: title,
-    description: description
-  })
+  Post.findById(req.params.id, 'url description date likes', function (error, post) {
+    if (error) { console.error(error); }
+    
+    var likesList = post.likes;
+    var index = likesList.indexOf(req.body.guid);
 
-  new_post.save(function (error) {
-    if (error) {
-      console.log(error)
+    if (index < 0) {
+      likesList.push(req.body.guid)
+    } else {
+      likesList.splice(index, 1);
     }
-    res.send({
-      success: true,
-      message: 'Post saved successfully!'
+    
+    post.likes = likesList
+
+    post.save(function (error) {
+      if (error) {
+        console.log(error)
+      }
+      res.send({
+        success: true,
+        likes: post.likes
+      })
     })
+
   })
 })
 
 // Fetch single post
 app.get('/post/:id', (req, res) => {
   var db = req.db;
-  Post.findById(req.params.id, 'title description', function (error, post) {
+  Post.findById(req.params.id, 'url description date', function (error, post) {
     if (error) { console.error(error); }
     res.send(post)
   })
@@ -160,11 +166,11 @@ app.get('/post/:id', (req, res) => {
 // Update a post
 app.put('/posts/:id', (req, res) => {
   var db = req.db;
-  Post.findById(req.params.id, 'title description', function (error, post) {
+  Post.findById(req.params.id, 'description date', function (error, post) {
     if (error) { console.error(error); }
 
-    post.title = req.body.title
     post.description = req.body.description
+    post.date = new Date()
     post.save(function (error) {
       if (error) {
         console.log(error)

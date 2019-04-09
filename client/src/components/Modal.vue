@@ -10,10 +10,6 @@
           <slot name="body">
           </slot>
         </section>
-        <footer class="modal-footer">
-          <slot name="footer">
-          </slot>
-        </footer>
       </div>
     </div>
   </transition>
@@ -55,5 +51,13 @@
     border-radius: 2px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
     transition: all .3s ease;
+  }
+  .modal-header {
+    position: relative;
+  }
+  .close {
+    position: absolute;
+    right: 5px;
+    top: 5px;
   }
 </style>

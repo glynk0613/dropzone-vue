@@ -7,6 +7,7 @@
         <h4 class="modal-title">
           New Posts
         </h4>
+ 				<button type="button" class="close" data-dismiss="modal" v-on:click="showPreview = false">✕</button>
       </div>
       <div slot="body" v-if="file">
         <div class="row">
@@ -74,6 +75,8 @@ export default {
       this.loading = false
       if (res.status === 200) {
         this.result = res.data
+        this.$emit('onPosted', res)
+        this.showPreview = false
       } else {
         this.posted = 'Something wrong!'
       }

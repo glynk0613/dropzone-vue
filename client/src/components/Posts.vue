@@ -1,34 +1,40 @@
 <template>
   <div class="row">
-    <div class="col-xs-18 col-sm-6 col-md-3 mt-3" v-bind:key="index" v-for="(post, index) in posts">
+    <div class="col-xs-12 col-sm-6 col-md-3 mt-3" v-bind:key="index" v-for="(post, index) in posts">
       <div class="thumbnail">
-        <div class="img-wrapper">
+        <div class="img-wrapper" v-on:click="selectPost(index)">
           <img :src="post.url ? baseUrl + post.url : blankUrl">
         </div>
         <div class="caption">
           <div class="time-caption">{{getTimeFromNow(post.date)}}</div>
-          <div>{{post.likes}} likes</div>
+          <div v-if="post.likes">{{post.likes.length}} likes</div>
         </div>
         <div class="description">
           <p>{{post.description}}</p>
         </div>
         <div class="like-wrapper">
-          <input type="checkbox" class="form-check-input" :id="'chbox' + index">
+          <input type="checkbox" class="form-check-input" :id="'chbox' + index" v-on:click="setLikeIt(index)" :checked="getLikeIt(index)">
           <label class="form-check-label" :for="'chbox' + index">LIKE</label>
         </div>              
       </div>
     </div>
-    <div class="col">
+    <div class="col-xl-12">
       <nav aria-label="Page navigation example">
-        <ul class="pagination justify-content-center">
-          <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1">Previous</a>
+        <ul v-if="totalPages" class="pagination justify-content-center">
+          <li  :class="currentPage < 2 ? 'page-item disabled' : 'page-item'">
+            <a class="page-link" href="#" tabindex="-1" v-on:click="getPosts(currentPage-1)">
+              <i class="fa fa-arrow-left"></i>
+            </a>
           </li>
-          <li class="page-item"><a class="page-link" href="#">1</a></li>
-          <li class="page-item"><a class="page-link" href="#">2</a></li>
-          <li class="page-item"><a class="page-link" href="#">3</a></li>
-          <li class="page-item">
-            <a class="page-link" href="#">Next</a>
+          
+          <li :class="currentPage == pageNumber ? 'page-item active' : 'page-item'" v-for="pageNumber in totalPages" :key="pageNumber">
+            <a class="page-link" href="#" v-on:click="getPosts(pageNumber)">{{pageNumber}}</a>
+          </li>
+
+          <li :class="currentPage >= totalPages ? 'page-item disabled' : 'page-item'">
+            <a class="page-link" href="#" v-on:click="getPosts(currentPage+1)">
+              <i class="fa fa-arrow-right"></i>
+            </a>
           </li>
         </ul>
       </nav>
@@ -39,6 +45,7 @@
 
 <script>
 import PostsService from '@/services/PostsService'
+import Guid from '@/services/Guid'
 export default {
   name: 'posts',
   data () {
@@ -52,20 +59,39 @@ export default {
     }
   },
   mounted () {
-    this.getPosts()
+    this.getPosts(1)
   },
   methods: {
-    async getPosts () {
-      const response = await PostsService.fetchPosts(this.currentPage)
+    async getPosts (pageIndex) {
+      const response = await PostsService.fetchPosts(pageIndex)
       this.posts = response.data.posts
       this.totalPages = response.data.totalPages
       this.perPage = response.data.perPage
+      this.currentPage = pageIndex
       console.log(response.data)
     },
     async deletePost (id) {
       await PostsService.deletePost(id)
       this.getPosts()
       this.$router.push({ name: 'Posts' })
+    },
+    async setLikeIt(postIndex) {
+      const postId = this.posts[postIndex]._id
+      const response = await PostsService.likePost({id: postId, guid:Guid()})
+      this.posts[postIndex].likes = response.data.likes
+      console.log(response)
+    },
+    selectPost(index) {
+      this.$router.push({ 
+        name: 'EditPost',
+        params: { 
+          id: this.posts[index]._id
+        } 
+      })
+    },
+    getLikeIt (postIndex) {
+      const index = this.posts[postIndex].likes.indexOf(Guid())
+      return index > -1
     },
     getTimeFromNow (postDate) {
       if (!postDate) return 'N/A'

@@ -4,8 +4,8 @@ var Schema = mongoose.Schema;
 var PostSchema = new Schema({
   url: String,
   description: String,
-  likes: Number,
-  date: Date
+  date: Date,
+  likes: [String]
 });
 
 var Post = mongoose.model("Post", PostSchema);
