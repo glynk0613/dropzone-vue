@@ -1,25 +1,18 @@
 # VENoM-Docker
-Vue, Express, Node, Mongo with Docker-compose setup for local development. Hot Reload, SASS live compilation, among other goodies :)  
+Image uploader / browser (Vue, Express/Node Mongo with Docker-compose)
 
-Tutorial here:
-
-https://medium.com/@audretschjames/venom-stack-docker-setup-for-local-development-457093761ad1
 
 ### Steps to Run
 
-1. Clone this repository
-
-> git clone https://github.com/jamesaud/VENoM-Docker
-
-2. Navigate into the directory VENoM-Docker
+1. Navigate into the directory VENoM-Docker
 
 > cd your-path-to/VENOM-Docker
 
-3. Build Docker Images
+2. Build Docker Images
 
 > docker-compose build
 
-4. Run the stack :)
+3. Run the stack :)
 
 > docker-compose up
 
@@ -40,10 +33,5 @@ NPM apps are a bit tricky to install in Docker, because the binaries have to be 
 
 
 Be sure to change the environment variables (DATABASE_URL, API_URL) in docker-compose.yml according to your setup. Default should work if running on localhost.
-
-
-### Warnings
-
-Warning: If you run 'npm install' locally in the server or client folders, you'll need to delete 'node_modules' before running again with the docker setup. The binaries need to be install in the container's OS to work.
 
 
