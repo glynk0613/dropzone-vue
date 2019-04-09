@@ -104,14 +104,23 @@ app.post('/upload', upload.single('file'), (req, res) => {
 );
 
 // SERVER Setup
-app.get('/posts/:pageNumber', (req, res) => {
+app.get('/posts/:pageNumber', async (req, res) => {
+ 
+  const getTotalRecords = () => new Promise(resolve => {
+    Post.count({}, (err, count) => {
+      resolve(count)
+    })
+  })
+  var totalRecords = await getTotalRecords()
   var currentPage = req.params.pageNumber ? req.params.pageNumber : 1
-  var total = Post.find({}).count()
+
+  var totalPages = Math.ceil(totalRecords / perPage)
+  
   Post.find({}, 'url description likes date', function (error, posts) {
     if (error) { console.error(error); }
     res.send({
       perPage: perPage,
-      total: total,
+      totalPages: totalRecords,
       posts: posts
     })
   }).sort({_id:-1}).skip(perPage * (currentPage - 1)).limit(perPage)
